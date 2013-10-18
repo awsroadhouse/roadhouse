@@ -95,11 +95,15 @@ class PortParseTest(unittest.TestCase):
         tmp = self.parse("10-20, 80-100")
         ports = tmp.ports
 
-        p0 = ports[0]
+        p = ports[0]
 
-        self.assertEqual(10, p0[0])
-        self.assertEqual(20, p0[1])
+        self.assertEqual(10, p[0])
+        self.assertEqual(20, p[1])
 
+        p = ports[1]
+
+        self.assertEqual(80, p[0])
+        self.assertEqual(100, p[1])
 
 
 
