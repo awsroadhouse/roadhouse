@@ -3,7 +3,7 @@ import yaml
 import boto
 from boto.ec2 import EC2Connection
 
-from pyparsing import Word, nums, CaselessKeyword, Optional, Combine, And, Keyword, delimitedList
+from pyparsing import Word, nums, CaselessKeyword, Optional, Combine, And, Keyword, delimitedList, Or
 
 
 def sync(yaml_file_path, ec2_conn = None):
@@ -74,11 +74,11 @@ port_or_range = port | port_range
 
 port_or_port_range_list = delimitedList(port_or_range)
 
-mask = Word("/") + Word(nums)
+mask = Combine(Word("/"), Word(nums))
 
-ip= Combine(Word(nums) + ('.' + Word(nums))*3)
+ip= Combine(Word(nums) + ('.' + Word(nums))*3) + Optional(mask)
 
-parser = Optional(tcp_ | udp_)('protocol') + Optional(port_) + ip + Optional(mask)
+parser = Optional(tcp_ | udp_)('protocol') + Optional(port_) + port_or_port_range_list('ports') + (ip^ Keyword("*"))('ip')
 
 
 class Rule(object):
@@ -91,5 +91,5 @@ class Rule(object):
         returns a list of rules
         a single line may yield multiple rules
         """
-        result = parser.match(rule_string)
+        result = parser.parseString(rule_string)
         return [result]

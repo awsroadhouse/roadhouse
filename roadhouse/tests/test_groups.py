@@ -53,5 +53,8 @@ class RulesParsingTest(unittest.TestCase):
     def test_tcp_with_ip(self):
         result = groups.Rule.parse("tcp port 80 192.168.1.1/32")
         assert len(result) == 1
+        result = result[0]
+        assert result.ip == '192.168.1.1'
+        assert result.mask == '32'
 
 
