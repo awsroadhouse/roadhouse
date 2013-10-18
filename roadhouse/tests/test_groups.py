@@ -22,8 +22,9 @@ class CreationTest(BaseConfigTestCase):
     @mock_ec2
     def test_creation_no_existing_groups(self):
         c = self.config
-        self.assertGreater(c.new_group_count, 0)
+        c.apply()
         self.assertEqual(c.updated_group_count, 0)
+        self.assertGreater(c.new_group_count, 0)
 
     @mock_ec2
     def test_no_description(self):
