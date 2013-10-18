@@ -9,6 +9,7 @@ test_database_group:
     - tcp port 22 166.1.1.1/32 # mysterious office IP
     - tcp port 9160, 6379 test_web_group # refer to a group by name
     - port 22 * # tcp by default, allow everything
+    - port 55 192.168.1.1 # /32 by default
 
 test_web_group:
   options:
