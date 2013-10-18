@@ -70,22 +70,26 @@ def to_int(s,l,t):
     return [int(t[0])]
 
 def to_port_range(s, l, t):
-    return
-    #return [int(t[0]), int(t[1])]
+    if t[0].port:
+        return [(t[0].port, t[0].port)]
+    else:
+        return [(t[0][0].port, t[0][1].port)]
 
-port = Group(Word(nums).setParseAction(to_int))
-port_range = Group((port + Word("-").suppress() + port))
+port = Group(Word(nums).setParseAction(to_int)('port'))
+port_range = Group((port + Word("-").suppress() + port)('range'))
 
-port_or_port_range_list = Group(delimitedList(port('single_port') ^ port_range('port_range')))('ports')
+normalized_port_range = (port ^ port_range).setParseAction(to_port_range)
 
-# IP addresses
-mask = Word("/") + Word(nums).setParseAction(to_int)('mask')
-ip= Combine(Word(nums) + ('.' + Word(nums))*3) + Optional(mask)
-
-parser = Optional(tcp_ ^ udp_)('protocol') + \
-         Optional(port_) + \
-         port_or_port_range_list + \
-         (ip ^ Keyword("*"))('ip')
+#  = Group(delimitedList(port_list)('ports'))
+#
+# # IP addresses
+# mask = Word("/") + Word(nums).setParseAction(to_int)('mask')
+# ip= Combine(Word(nums) + ('.' + Word(nums))*3) + Optional(mask)
+#
+# parser = Optional(tcp_ ^ udp_)('protocol') + \
+#          Optional(port_) + \
+#          port_or_port_range_list + \
+#          (ip ^ Keyword("*"))('ip')
 
 
 class Rule(object):
