@@ -1,0 +1,27 @@
+# sample YAML for configuring security groups
+
+test_database_group:
+  options:
+    description: cassandra and redis
+    prune: true # remove rules not listed here
+
+  rules:
+    - tcp port 22 166.1.1.1/32 # mysterious office IP
+    - tcp port 9160, 6379 test_web_group # refer to a group by name
+
+test_web_group:
+  options:
+    description: web servers
+    prune: false # false by default
+
+  rules:
+    - tcp port 80 0.0.0.0/0
+
+
+test_vpc_group:
+  options:
+    vpc: sg_vpc
+
+  rules:
+    - tcp port 80 192.168.1.1/24
+
