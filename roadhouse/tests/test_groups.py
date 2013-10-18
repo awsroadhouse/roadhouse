@@ -87,6 +87,7 @@ class SimplePortParseTest(unittest.TestCase):
 
     def test_port_range(self):
         tmp = self.parse("80-100")
+        self.assertEqual(tmp[0], (80, 100))
 
 class PortParseTest(unittest.TestCase):
 
