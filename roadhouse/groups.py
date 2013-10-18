@@ -3,7 +3,7 @@ import yaml
 import boto
 from boto.ec2 import EC2Connection
 
-from pyparsing import Word, nums, CaselessKeyword, Optional, Combine, And, Keyword, delimitedList, Or
+from pyparsing import Word, nums, CaselessKeyword, Optional, Combine, And, Keyword, delimitedList, Or, Group
 
 
 def sync(yaml_file_path, ec2_conn = None):
@@ -66,19 +66,26 @@ port_ = CaselessKeyword("port")
 tcp_ = CaselessKeyword("tcp")
 udp_ = CaselessKeyword("udp")
 
+def to_int(s,l,t):
+    return [int(t[0])]
 
-port = Word(nums)
-port_range = port + Word("-") + port
+def to_port_range(s, l, t):
+    return
+    #return [int(t[0]), int(t[1])]
 
-port_or_range = port | port_range
+port = Group(Word(nums).setParseAction(to_int))
+port_range = Group((port + Word("-").suppress() + port))
 
-port_or_port_range_list = delimitedList(port_or_range)
+port_or_port_range_list = Group(delimitedList(port('single_port') ^ port_range('port_range')))('ports')
 
-mask = Combine(Word("/"), Word(nums))
-
+# IP addresses
+mask = Word("/") + Word(nums).setParseAction(to_int)('mask')
 ip= Combine(Word(nums) + ('.' + Word(nums))*3) + Optional(mask)
 
-parser = Optional(tcp_ | udp_)('protocol') + Optional(port_) + port_or_port_range_list('ports') + (ip^ Keyword("*"))('ip')
+parser = Optional(tcp_ ^ udp_)('protocol') + \
+         Optional(port_) + \
+         port_or_port_range_list + \
+         (ip ^ Keyword("*"))('ip')
 
 
 class Rule(object):

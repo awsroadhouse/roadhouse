@@ -49,12 +49,57 @@ class CreationTest(BaseConfigTestCase):
 
 
 
+parse = groups.Rule.parse
+
 class RulesParsingTest(unittest.TestCase):
     def test_tcp_with_ip(self):
-        result = groups.Rule.parse("tcp port 80 192.168.1.1/32")
+        result = parse("tcp port 80 192.168.1.1/32")
         assert len(result) == 1
         result = result[0]
         assert result.ip == '192.168.1.1'
-        assert result.mask == '32'
+        self.assertEqual(result.mask, 32)
+
+    def test_no_tcp_specified(self):
+        tmp = parse("port 80 192.168.1.1")[0]
+        self.assertEqual("192.168.1.1", tmp.ip)
+        self.assertEqual(80, tmp.port)
+
+    def test_ip_range(self):
+        tmp = parse("tcp port 80-100 192.168.1.1")[0]
+        self.assertEqual(tmp.port_range[0], 80)
+
+        tmp = parse("tcp port 80-100, 100-200 192.168.1.1")[0]
+        self.assertEqual(tmp.port_range[0], 80)
+
+    def test_mask(self):
+
+        result = groups.mask.parseString("/32")
+        self.assertEqual(result.mask, 32)
+
+
+class PortParseTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.parse = groups.port_or_port_range_list.parseString
+
+    def test_single_port(self):
+        tmp = self.parse("80")
+
+    def test_port_range(self):
+        tmp = self.parse("80-100")
+
+    def test_port_and_range(self):
+        tmp = self.parse("22, 80-100")
+
+    def test_double_range(self):
+        tmp = self.parse("10-20, 80-100")
+        ports = tmp.ports
+
+        p0 = ports[0]
+
+        self.assertEqual(10, p0[0])
+        self.assertEqual(20, p0[1])
+
+
 
 
