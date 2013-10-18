@@ -3,6 +3,8 @@ import yaml
 import boto
 from boto.ec2 import EC2Connection
 
+from pyparsing import Word, nums, White, CaselessKeyword
+
 def sync(yaml_file_path, ec2_conn = None):
     # convenience method.  you'll probably always want this for simplicity
     # if ec2_conn is none, we will try to connect using the default settings
@@ -56,4 +58,20 @@ class SecurityGroupsConfig(object):
             else:
                 # update desc if it's wrong
                 self.updated_group_count += 1
+        return self
 
+port = CaselessKeyword("port")
+
+
+class Rule(object):
+    def __init__(self):
+        pass
+
+    @classmethod
+    def parse(cls, rule_string):
+        """
+        returns a list of rules
+        a single line may yield multiple rules
+        """
+        result = rule_parser.match(rule_string)
+        return [result]

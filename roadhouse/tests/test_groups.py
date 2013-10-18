@@ -15,6 +15,11 @@ class BaseConfigTestCase(unittest.TestCase):
     def config(self):
         return groups.SecurityGroupsConfig.load('sample.yaml').configure(self.ec2)
 
+def cc(tmp, ec2):
+    # shorthand to create a config and apply
+    config = groups.SecurityGroupsConfig(tmp).configure(ec2)
+    return config.apply()
+
 
 class CreationTest(BaseConfigTestCase):
     # ensures new groups are created
@@ -33,4 +38,20 @@ class CreationTest(BaseConfigTestCase):
         config = groups.SecurityGroupsConfig(tmp).configure(self.ec2)
         config.apply()
         self.assertGreater(config.new_group_count, 0)
+
+    @mock_ec2
+    def test_vpc(self):
+        tmp = {"test_vpc":
+                   {"options": {"vpc":"test_vpc"} }}
+
+        c = cc(tmp, self.ec2)
+        self.assertGreater(c.new_group_count, 0)
+
+
+
+class RulesParsingTest(unittest.TestCase):
+    def test_tcp_with_ip(self):
+        result = groups.Rule.parse("tcp port 80 192.168.1.1/32")
+        assert len(result) == 1
+
 
