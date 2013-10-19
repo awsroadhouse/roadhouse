@@ -80,7 +80,8 @@ port_range = Group((port + Word("-").suppress() + port)('range'))
 
 normalized_port_range = (port ^ port_range).setParseAction(to_port_range)
 
-#  = Group(delimitedList(port_list)('ports'))
+ports  = delimitedList(normalized_port_range)('ports')
+
 #
 # # IP addresses
 # mask = Word("/") + Word(nums).setParseAction(to_int)('mask')

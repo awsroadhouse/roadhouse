@@ -89,27 +89,23 @@ class SimplePortParseTest(unittest.TestCase):
         tmp = self.parse("80-100")
         self.assertEqual(tmp[0], (80, 100))
 
+
 class PortParseTest(unittest.TestCase):
-
-
+    @classmethod
+    def setUpClass(cls):
+        cls.parse = groups.ports.parseString
 
     def test_port_and_range(self):
         tmp = self.parse("22, 80-100")
+        self.assertEqual(tmp.ports[0], (22, 22))
+        self.assertEqual(tmp.ports[1], (80, 100))
 
     def test_double_range(self):
         tmp = self.parse("10-20, 80-100")
-        ports = tmp.ports
+        self.assertEqual(tmp.ports[0], (10, 20))
+        self.assertEqual(tmp.ports[1], (80, 100))
 
-        import ipdb; ipdb.set_trace()
-        p = ports[0]
 
-        #self.assertEqual(10, p[0])
-        #self.assertEqual(20, p[1])
-
-        p = ports[1]
-
-        self.assertEqual(80, p[0])
-        self.assertEqual(100, p[1])
 
 
 
