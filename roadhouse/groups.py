@@ -75,6 +75,10 @@ def to_port_range(s, l, t):
     else:
         return [(t[0][0].port, t[0][1].port)]
 
+def normalize_ip(s,l,t):
+    # returns a normalized ip
+    return
+
 port = Group(Word(nums).setParseAction(to_int)('port'))
 port_range = Group((port + Word("-").suppress() + port)('range'))
 
@@ -85,13 +89,13 @@ ports  = delimitedList(normalized_port_range)('ports')
 #
 # # IP addresses
 mask = Word("/") + Word(nums).setParseAction(to_int)('mask')
-ip= Combine(Word(nums) + ('.' + Word(nums))*3) + Optional(mask)
+ip= Combine(Word(nums) + ('.' + Word(nums))*3)('ip') + Optional(mask)
 
 
 parser = Optional(tcp_ ^ udp_)('protocol') + \
          Optional(port_) + \
          ports + \
-         (ip ^ Keyword("*"))('ip')
+         (ip ^ Keyword("*"))
 
 
 class Rule(object):
