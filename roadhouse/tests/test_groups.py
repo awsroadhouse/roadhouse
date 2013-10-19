@@ -48,7 +48,6 @@ class CreationTest(BaseConfigTestCase):
         self.assertGreater(c.new_group_count, 0)
 
 
-
 parse = groups.Rule.parse
 
 class RulesParsingTest(unittest.TestCase):
@@ -62,17 +61,22 @@ class RulesParsingTest(unittest.TestCase):
     def test_no_tcp_specified(self):
         tmp = parse("port 80 192.168.1.1")[0]
         self.assertEqual("192.168.1.1", tmp.ip)
-        self.assertEqual(80, tmp.port)
+        self.assertEqual(tmp.ports[0], (80,80))
 
-    def test_ip_range(self):
-        tmp = parse("tcp port 80-100 192.168.1.1")[0]
-        self.assertEqual(tmp.port_range[0], 80)
+class IPTest(unittest.TestCase):
 
-        tmp = parse("tcp port 80-100, 100-200 192.168.1.1")[0]
-        self.assertEqual(tmp.port_range[0], 80)
+    @classmethod
+    def setUpClass(cls):
+        cls.parse = groups.ip.parseString
 
+    def test_ip_no_mask(self):
+        tmp = self.parse("192.168.1.1")[0]
+
+    def test_ip_with_mask(self):
+        tmp = self.parse("192.168.1.1/32")[0]
+
+class MaskTest(unittest.TestCase):
     def test_mask(self):
-
         result = groups.mask.parseString("/32")
         self.assertEqual(result.mask, 32)
 

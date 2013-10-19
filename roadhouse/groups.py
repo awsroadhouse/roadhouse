@@ -84,13 +84,14 @@ ports  = delimitedList(normalized_port_range)('ports')
 
 #
 # # IP addresses
-# mask = Word("/") + Word(nums).setParseAction(to_int)('mask')
-# ip= Combine(Word(nums) + ('.' + Word(nums))*3) + Optional(mask)
-#
-# parser = Optional(tcp_ ^ udp_)('protocol') + \
-#          Optional(port_) + \
-#          port_or_port_range_list + \
-#          (ip ^ Keyword("*"))('ip')
+mask = Word("/") + Word(nums).setParseAction(to_int)('mask')
+ip= Combine(Word(nums) + ('.' + Word(nums))*3) + Optional(mask)
+
+
+parser = Optional(tcp_ ^ udp_)('protocol') + \
+         Optional(port_) + \
+         ports + \
+         (ip ^ Keyword("*"))('ip')
 
 
 class Rule(object):
