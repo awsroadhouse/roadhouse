@@ -120,7 +120,15 @@ class PortParseTest(unittest.TestCase):
         self.assertEqual(tmp.ports[0], (10, 20))
         self.assertEqual(tmp.ports[1], (80, 100))
 
+class RuleParseTest(unittest.TestCase):
+    def test_single_rule(self):
+        result = groups.Rule.parse("tcp port 80 127.0.0.1/32")
 
+        self.assertEqual(len(result), 1)
+        tmp = result[0]
+        self.assertTrue(isinstance(tmp, groups.Rule))
+        self.assertEqual(tmp.from_port, 80)
+        self.assertEqual(tmp.to_port, 80)
 
 
 

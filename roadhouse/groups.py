@@ -103,9 +103,11 @@ parser = Optional(protocol)('protocol') + \
 class Rule(object):
 
     def __init__(self, protocol, from_port, to_port, address=None, group=None):
-        self.protocol = protocol
+        self.protocol = protocol or "tcp"
         self.from_port = from_port
         self.to_port = to_port
+        self.address = address
+        self.group = group
 
     @classmethod
     def parse(cls, rule_string):
@@ -114,5 +116,10 @@ class Rule(object):
         a single line may yield multiple rules
         """
         result = parser.parseString(rule_string)
+        rules = []
         # breakout port ranges into multple rules
-        return [result]
+        for x,y in result.ports:
+            r = Rule(result.protocol, x, y, result.ip_and_mask)
+            rules.append(r)
+        return rules
+
