@@ -73,11 +73,13 @@ class IPTest(unittest.TestCase):
         cls.parse = groups.ip.parseString
 
     def test_ip_no_mask(self):
-        tmp = self.parse("192.168.1.1")
-        self.assertEqual("192.168.1.1", tmp)
+        # ensurs we get the mask added as /32
+        tmp = self.parse("192.168.1.1")[0]
+        self.assertEqual("192.168.1.1/32", tmp)
 
     def test_ip_with_mask(self):
         tmp = self.parse("192.168.1.1/32")[0]
+        self.assertEqual("192.168.1.1/32", tmp)
 
 class MaskTest(unittest.TestCase):
     def test_mask(self):

@@ -75,9 +75,9 @@ def to_port_range(s, l, t):
     else:
         return [(t[0][0].port, t[0][1].port)]
 
-def normalize_ip(s,l,t):
+def normalize_ip(t):
     # returns a normalized ip
-    return
+    return t.ip + "/" + (str(t.mask.mask) if t.mask else "32")
 
 port = Group(Word(nums).setParseAction(to_int)('port'))
 port_range = Group((port + Word("-").suppress() + port)('range'))
@@ -87,9 +87,9 @@ normalized_port_range = (port ^ port_range).setParseAction(to_port_range)
 ports  = delimitedList(normalized_port_range)('ports')
 
 # IP addresses, name of another group, or sg-*
-security_group = Regex("sg-[\w\d]")
+security_group = Regex("sg-[\w\d]+")
 mask = Word("/") + Word(nums).setParseAction(to_int)('mask')
-ip= Combine(Word(nums) + ('.' + Word(nums))*3)('ip') + Optional(mask)
+ip= (Combine(Word(nums) + ('.' + Word(nums))*3)('ip') + Optional(mask)('mask')).setParseAction(normalize_ip)
 
 
 parser = Optional(tcp_ ^ udp_)('protocol') + \
