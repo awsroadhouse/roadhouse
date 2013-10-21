@@ -60,6 +60,11 @@ class RulesParsingTest(unittest.TestCase):
         self.assertEqual(result.ip_and_mask, "192.168.1.1/32")
         self.assertEqual(result.ports[0], (80, 80))
 
+    def test_multiple_ports(self):
+        result = self.parse("tcp port 80, 100 192.168.1.1/32")
+
+        self.assertEqual(result.ports[0], (80,80))
+        self.assertEqual(result.ports[1], (100,100))
 
     # def test_no_tcp_specified(self):
     #     tmp = self.parse("port 80 192.168.1.1")
