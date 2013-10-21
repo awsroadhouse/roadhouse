@@ -3,7 +3,7 @@ import yaml
 import boto
 from boto.ec2 import EC2Connection
 
-from pyparsing import Word, nums, CaselessKeyword, Optional, Combine, And, Keyword, delimitedList, Or, Group
+from pyparsing import Word, nums, CaselessKeyword, Optional, Combine, And, Keyword, delimitedList, Or, Group, Regex
 
 
 def sync(yaml_file_path, ec2_conn = None):
@@ -86,8 +86,8 @@ normalized_port_range = (port ^ port_range).setParseAction(to_port_range)
 
 ports  = delimitedList(normalized_port_range)('ports')
 
-#
-# # IP addresses
+# IP addresses, name of another group, or sg-*
+security_group = Regex("sg-[\w\d]")
 mask = Word("/") + Word(nums).setParseAction(to_int)('mask')
 ip= Combine(Word(nums) + ('.' + Word(nums))*3)('ip') + Optional(mask)
 

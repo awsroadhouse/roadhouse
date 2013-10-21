@@ -1,3 +1,4 @@
+import os
 import unittest
 import boto
 from moto import mock_ec2
@@ -13,7 +14,8 @@ class BaseConfigTestCase(unittest.TestCase):
 
     @property
     def config(self):
-        return groups.SecurityGroupsConfig.load('sample.yaml').configure(self.ec2)
+        sample = os.path.dirname(__file__) + "/sample.yaml"
+        return groups.SecurityGroupsConfig.load(sample).configure(self.ec2)
 
 def cc(tmp, ec2):
     # shorthand to create a config and apply
