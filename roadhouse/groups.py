@@ -95,12 +95,15 @@ ip= (Combine(Word(nums) + ('.' + Word(nums))*3)('ip') + Optional(mask)('mask')).
 parser = Optional(tcp_ ^ udp_)('protocol') + \
          Optional(port_) + \
          ports + \
-         ip
+         (ip.setResultsName('ip_and_mask') ^ security_group.setResultsName('security_group'))
 
 
 class Rule(object):
-    def __init__(self):
-        pass
+
+    def __init__(self, protocol, from_port, to_port, address=None, group=None):
+        self.protocol = protocol
+        self.from_port = from_port
+        self.to_port = to_port
 
     @classmethod
     def parse(cls, rule_string):

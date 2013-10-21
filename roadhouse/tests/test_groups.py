@@ -49,22 +49,22 @@ class CreationTest(BaseConfigTestCase):
         c = cc(tmp, self.ec2)
         self.assertGreater(c.new_group_count, 0)
 
-# class RulesParsingTest(unittest.TestCase):
-#     @classmethod
-#     def setUpClass(cls):
-#         cls.parse = groups.parser.parseString
-#
-#     def test_tcp_with_ip(self):
-#         result = self.parse("tcp port 80 192.168.1.1/32")
-#         assert len(result) == 1
-#         result = result[0]
-#         assert result.ip == '192.168.1.1'
-#         self.assertEqual(result.mask, 32)
-#
-#     def test_no_tcp_specified(self):
-#         tmp = self.parse("port 80 192.168.1.1")
-#         self.assertEqual("192.168.1.1", tmp.ip)
-#         self.assertEqual(tmp.ports[0], (80,80))
+class RulesParsingTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.parse = groups.parser.parseString
+
+    def test_tcp_with_ip(self):
+        result = self.parse("tcp port 80 192.168.1.1/32")
+        self.assertEqual(result.protocol, "tcp")
+        self.assertEqual(result.ip_and_mask, "192.168.1.1/32")
+        self.assertEqual(result.ports[0], (80, 80))
+
+
+    # def test_no_tcp_specified(self):
+    #     tmp = self.parse("port 80 192.168.1.1")
+    #     self.assertEqual("192.168.1.1", tmp.ip)
+    #     self.assertEqual(tmp.ports[0], (80,80))
 
 class IPTest(unittest.TestCase):
 
