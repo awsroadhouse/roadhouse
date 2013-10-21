@@ -66,6 +66,8 @@ port_ = CaselessKeyword("port")
 tcp_ = CaselessKeyword("tcp")
 udp_ = CaselessKeyword("udp")
 
+protocol = tcp_ ^ udp_
+
 def to_int(s,l,t):
     return [int(t[0])]
 
@@ -79,6 +81,7 @@ def normalize_ip(t):
     # returns a normalized ip
     return t.ip + "/" + (str(t.mask.mask) if t.mask else "32")
 
+
 port = Group(Word(nums).setParseAction(to_int)('port'))
 port_range = Group((port + Word("-").suppress() + port)('range'))
 
@@ -91,8 +94,7 @@ security_group = Regex("sg-[\w\d]+")
 mask = Word("/") + Word(nums).setParseAction(to_int)('mask')
 ip= (Combine(Word(nums) + ('.' + Word(nums))*3)('ip') + Optional(mask)('mask')).setParseAction(normalize_ip)
 
-
-parser = Optional(tcp_ ^ udp_)('protocol') + \
+parser = Optional(protocol)('protocol') + \
          Optional(port_) + \
          ports + \
          (ip.setResultsName('ip_and_mask') ^ security_group.setResultsName('security_group'))
