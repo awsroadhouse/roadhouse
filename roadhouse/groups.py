@@ -95,7 +95,7 @@ ip= (Combine(Word(nums) + ('.' + Word(nums))*3)('ip') + Optional(mask)('mask')).
 parser = Optional(tcp_ ^ udp_)('protocol') + \
          Optional(port_) + \
          ports + \
-         (ip ^ Keyword("*"))
+         ip
 
 
 class Rule(object):
@@ -109,4 +109,5 @@ class Rule(object):
         a single line may yield multiple rules
         """
         result = parser.parseString(rule_string)
+        # breakout port ranges into multple rules
         return [result]
