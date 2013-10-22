@@ -58,6 +58,7 @@ class SecurityGroupsConfig(object):
             group = groups[x]
             if y.get('rules'):
                 rules += [Rule.parse(rule) for rule in y.get('rules')]
+                # need to use chain because multiple rules can be created for a single stanza
                 for rule in itertools.chain(*rules):
                     group.authorize(rule.protocol, rule.from_port, rule.to_port, rule.address, groups.get(rule.group_name, None))
                 # apply rules
