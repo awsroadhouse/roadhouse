@@ -49,6 +49,7 @@ class CreationTest(BaseConfigTestCase):
         c = cc(tmp, self.ec2)
         self.assertGreater(c.new_group_count, 0)
 
+
 class RulesParsingTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

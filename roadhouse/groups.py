@@ -51,12 +51,15 @@ class SecurityGroupsConfig(object):
 
         # reloads groups
         self.existing_groups = self.ec2.get_all_security_groups()
+
         groups = {k.name:k for k in self.existing_groups}
 
-
         for x,y in self.config.items():
+            group = groups[x]
             if y.get('rules'):
                 rules += [Rule.parse(rule) for rule in y.get('rules')]
+                for rule in itertools.chain(*rules):
+                    group.authorize(rule.protocol, rule.from_port, rule.to_port, rule.address, groups.get(rule.group_name, None))
                 # apply rules
 
         return self
