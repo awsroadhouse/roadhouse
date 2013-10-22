@@ -51,7 +51,7 @@ class SecurityGroupsConfig(object):
                 rules += [Rule.parse(rule) for rule in y.get('rules')]
 
         return self
-    
+
     def apply_groups(self):
         if self.existing_groups is None:
             self.existing_groups = self.ec2.get_all_security_groups()
