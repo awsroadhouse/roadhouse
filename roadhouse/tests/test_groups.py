@@ -32,6 +32,7 @@ class CreationTest(BaseConfigTestCase):
         c.apply()
         self.assertEqual(c.updated_group_count, 0)
         self.assertGreater(c.new_group_count, 0)
+        c.apply()
 
     @mock_ec2
     def test_no_description(self):
