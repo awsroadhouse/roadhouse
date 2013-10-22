@@ -2,6 +2,7 @@
 import yaml
 import boto
 from boto.ec2 import EC2Connection
+import itertools
 
 from pyparsing import Word, nums, CaselessKeyword, Optional, Combine, And, Keyword, delimitedList, Or, Group, Regex
 
@@ -42,6 +43,16 @@ class SecurityGroupsConfig(object):
         """
         returns a list of new security groups that will be added
         """
+        rules = []
+        self.apply_groups()
+
+        for x,y in self.config.items():
+            if y.get('rules'):
+                rules += [Rule.parse(rule) for rule in y.get('rules')]
+
+        return self
+    
+    def apply_groups(self):
         if self.existing_groups is None:
             self.existing_groups = self.ec2.get_all_security_groups()
 
@@ -59,7 +70,9 @@ class SecurityGroupsConfig(object):
             else:
                 # update desc if it's wrong
                 self.updated_group_count += 1
-        return self
+
+
+
 
 
 port_ = CaselessKeyword("port")
