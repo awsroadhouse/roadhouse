@@ -43,19 +43,25 @@ class SecurityGroupsConfig(object):
         """
         returns a list of new security groups that will be added
         """
+        if self.existing_groups is None:
+            self.existing_groups = self.ec2.get_all_security_groups()
+
         rules = []
-        self.apply_groups()
+        self._apply_groups()
+
+        # reloads groups
+        self.existing_groups = self.ec2.get_all_security_groups()
+        groups = {k.name:k for k in self.existing_groups}
+
 
         for x,y in self.config.items():
             if y.get('rules'):
                 rules += [Rule.parse(rule) for rule in y.get('rules')]
+                # apply rules
 
         return self
 
-    def apply_groups(self):
-        if self.existing_groups is None:
-            self.existing_groups = self.ec2.get_all_security_groups()
-
+    def _apply_groups(self):
         existing_group_names = [x.name for x in self.existing_groups]
 
         for x,y in self.config.items():
