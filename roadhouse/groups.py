@@ -91,23 +91,34 @@ ports  = delimitedList(normalized_port_range)('ports')
 
 # IP addresses, name of another group, or sg-*
 security_group = Regex("sg-[\w\d]+")
+group_name = Regex("[\w\d\-]+")
+
 mask = Word("/") + Word(nums).setParseAction(to_int)('mask')
 ip= (Combine(Word(nums) + ('.' + Word(nums))*3)('ip') + Optional(mask)('mask')).setParseAction(normalize_ip)
 
 parser = Optional(protocol)('protocol') + \
          Optional(port_) + \
          ports + \
-         (ip.setResultsName('ip_and_mask') ^ security_group.setResultsName('security_group'))
+         (ip.setResultsName('ip_and_mask') ^ security_group.setResultsName('security_group') ^ group_name('group_name'))
 
 
 class Rule(object):
 
-    def __init__(self, protocol, from_port, to_port, address=None, group=None):
+    def __init__(self, protocol, from_port, to_port, address=None, group=None, group_name=None):
+        """constructs a new rule
+        :param protocol tcp or udp
+        :param from_port
+        :param to_port
+        :param address
+        :param group sg-style (should almost never be used)
+        :param group_name
+        """
         self.protocol = protocol or "tcp"
         self.from_port = from_port
         self.to_port = to_port
         self.address = address
         self.group = group
+        self.group_name = group_name
 
     @classmethod
     def parse(cls, rule_string):
@@ -118,8 +129,15 @@ class Rule(object):
         result = parser.parseString(rule_string)
         rules = []
         # breakout port ranges into multple rules
+
+        kwargs = {}
+
+        kwargs['address'] = result.ip_and_mask or None
+        kwargs['group'] = result.security_group or None
+        kwargs['group_name'] = result.group_name or None
+
         for x,y in result.ports:
-            r = Rule(result.protocol, x, y, result.ip_and_mask)
+            r = Rule(result.protocol, x, y, **kwargs)
             rules.append(r)
         return rules
 

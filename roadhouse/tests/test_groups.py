@@ -130,5 +130,10 @@ class RuleParseTest(unittest.TestCase):
         self.assertEqual(tmp.from_port, 80)
         self.assertEqual(tmp.to_port, 80)
 
+    def test_group_name_parse(self):
+        result = groups.Rule.parse("tcp port 80 web_server")
 
-
+    def test_sg_parse(self):
+        sg = "sg-edcd9784"
+        result = groups.Rule.parse("tcp port 80 {}".format(sg))[0]
+        self.assertEqual(result.group, sg)
