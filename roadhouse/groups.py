@@ -6,6 +6,9 @@ import itertools
 
 from pyparsing import Word, nums, CaselessKeyword, Optional, Combine, And, Keyword, delimitedList, Or, Group, Regex
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 def sync(yaml_file_path, ec2_conn = None):
     # convenience method.  you'll probably always want this for simplicity
@@ -46,7 +49,6 @@ class SecurityGroupsConfig(object):
         if self.existing_groups is None:
             self.existing_groups = self.ec2.get_all_security_groups()
 
-        rules = []
         self._apply_groups()
 
         # reloads groups
@@ -55,15 +57,65 @@ class SecurityGroupsConfig(object):
         groups = {k.name:k for k in self.existing_groups}
 
         for x,y in self.config.items():
+            # process 1 security group at a time
             group = groups[x]
             if y.get('rules'):
-                rules += [Rule.parse(rule) for rule in y.get('rules')]
+                # apply all rule changes
+                rules = [Rule.parse(rule) for rule in y.get('rules')]
+                rules = list(itertools.chain(*rules))
+
+                rules = self.remove_existing_rules(rules, group)
                 # need to use chain because multiple rules can be created for a single stanza
-                for rule in itertools.chain(*rules):
-                    group.authorize(rule.protocol, rule.from_port, rule.to_port, rule.address, groups.get(rule.group_name, None))
+                for rule in rules:
+                    group.authorize(rule.protocol,
+                                    rule.from_port,
+                                    rule.to_port,
+                                    rule.address,
+                                    groups.get(rule.group_name, None))
                 # apply rules
 
         return self
+
+    def remove_existing_rules(self, rules, group):
+        """returns list of rules with the existing ones filtered out
+        :param group security group we need to check the rules against
+        :type group boto.ec2.securitygroup.SecurityGroup
+        :rtype list of Rule
+        """
+        tmp = []
+        for rule in rules:
+
+            def eq(x):
+                # returns if any of the existing rules match the one we're examinging
+
+                # these are simple catches that determine if we can rule out
+                # the existing rule
+                if x.ip_protocol != rule.protocol:
+                    logger.debug("ruled out due to protocol: %s vs %s", x.ip_protocol, rule.protocol)
+                    return False
+
+                if x.from_port != rule.from_port:
+                    logger.debug("ruled out due to from_port: %s vs %s", x.from_port, rule.from_port)
+                    return False
+
+                if x.to_port != rule.to_port:
+                    logger.debug("ruled out due to to_port: %s vs %s", x.to_port, rule.to_port)
+                    return False
+
+                # final check - if one of these rules matches we already have a matching rule
+                # and we return True
+                if rule.address and not filter(lambda y: y.cidr_ip == rule.address, x.grants ):
+                    return False
+
+                # if we fall through to here, none of our tests failed,
+                # thus, we match
+                return True
+
+            if not filter(eq, group.rules):
+                tmp.append(rule)
+        return tmp
+
+
 
     def _apply_groups(self):
         existing_group_names = [x.name for x in self.existing_groups]

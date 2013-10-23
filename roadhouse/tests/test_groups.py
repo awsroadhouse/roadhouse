@@ -139,3 +139,40 @@ class RuleParseTest(unittest.TestCase):
         sg = "sg-edcd9784"
         result = groups.Rule.parse("tcp port 80 {}".format(sg))[0]
         self.assertEqual(result.group, sg)
+
+
+class RemoveExistingRulesTest(BaseConfigTestCase):
+
+    @mock_ec2
+    def setUp(self):
+        super(RemoveExistingRulesTest, self).setUp()
+        self.sg = self.ec2.create_security_group("test_group", "jon is amazing")
+        self.sg2 = self.ec2.create_security_group("test_group2", "jon is terrible")
+        self.sg.authorize("tcp", 22, 22, "192.168.1.1/32")
+        self.sg.authorize("tcp", 100, 110, src_group=self.sg2)
+        self.c = groups.SecurityGroupsConfig(None)
+
+    @mock_ec2
+    def test_remove_duplicate(self):
+        rule = groups.Rule.parse("tcp port 22 192.168.1.1") # should get filtered
+        result = self.c.remove_existing_rules(rule, self.sg)
+        assert len(result) == 0
+
+    @mock_ec2
+    def test_leave_different_ip(self):
+        # should not filtered
+        rule = groups.Rule.parse("tcp port 22 192.168.1.2")
+        result = self.c.remove_existing_rules(rule, self.sg)
+        assert len(result) == 1
+
+    @mock_ec2
+    def test_leave_different_protocol(self):
+        # should not get filtered
+        rule = groups.Rule.parse("udp port 22 192.168.1.1")
+        result = self.c.remove_existing_rules(rule, self.sg)
+        assert len(result) == 1
+
+
+
+
+
