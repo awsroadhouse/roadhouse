@@ -23,10 +23,10 @@ def cc(tmp, ec2):
     return config.apply()
 
 
+@mock_ec2
 class CreationTest(BaseConfigTestCase):
     # ensures new groups are created
 
-    @mock_ec2
     def test_creation_no_existing_groups(self):
         c = self.config
         c.apply()
@@ -34,7 +34,6 @@ class CreationTest(BaseConfigTestCase):
         self.assertGreater(c.new_group_count, 0)
         c.apply()
 
-    @mock_ec2
     def test_no_description(self):
         tmp = {"test_no_description":
                    {"options": {} }}
@@ -42,7 +41,6 @@ class CreationTest(BaseConfigTestCase):
         config.apply()
         self.assertGreater(config.new_group_count, 0)
 
-    @mock_ec2
     def test_vpc(self):
         tmp = {"test_vpc":
                    {"options": {"vpc":"test_vpc"} }}
@@ -141,11 +139,11 @@ class RuleParseTest(unittest.TestCase):
         self.assertEqual(result.group, sg)
 
 
-class RemoveExistingRulesTest(BaseConfigTestCase):
+class RemoveExistingRulesTest(unittest.TestCase):
 
-    @mock_ec2
-    def setUp(self):
-        super(RemoveExistingRulesTest, self).setUp()
+    def setUp2(self):
+        # super(RemoveExistingRulesTest, self).setUp()
+        self.ec2 = boto.connect_ec2('somekey', 'somesecret')
         self.sg = self.ec2.create_security_group("test_group", "jon is amazing")
         self.sg2 = self.ec2.create_security_group("test_group2", "jon is terrible")
         self.sg.authorize("tcp", 22, 22, "192.168.1.1/32")
@@ -156,12 +154,14 @@ class RemoveExistingRulesTest(BaseConfigTestCase):
 
     @mock_ec2
     def test_remove_duplicate(self):
+        self.setUp2()
         rule = groups.Rule.parse("tcp port 22 192.168.1.1") # should get filtered
         result = self.c.remove_existing_rules(rule, self.sg)
         assert len(result) == 0
 
     @mock_ec2
     def test_make_sure_wrong_group_isnt_removed(self):
+        self.setUp2()
         self.sg2 = self.ec2.create_security_group("test_group3", "jon is not bad")
         self.c.reload_remote_groups()
         rule = groups.Rule.parse("tcp port 100-110 test_group3")
@@ -171,12 +171,15 @@ class RemoveExistingRulesTest(BaseConfigTestCase):
     @mock_ec2
     def test_leave_different_ip(self):
         # should not filtered
+        self.setUp2()
         rule = groups.Rule.parse("tcp port 22 192.168.1.2")
         result = self.c.remove_existing_rules(rule, self.sg)
         assert len(result) == 1
 
+    @mock_ec2
     def test_leave_different_protocol(self):
         # should not get filtered
+        self.setUp2()
         rule = groups.Rule.parse("udp port 22 192.168.1.1")
         result = self.c.remove_existing_rules(rule, self.sg)
         assert len(result) == 1

@@ -117,12 +117,12 @@ class SecurityGroupsConfig(object):
                 if rule.group_name:
                     logger.debug("Checking group name %s against known groups", rule.group_name)
 
-                    if not filter(lambda z: z.name == rule.group_name, self.existing_groups):
-                        logger.debug("Group name {} didn't match", rule.group_name)
+                    if not filter(lambda z: z.name == rule.group_name, x.grants):
+                        logger.debug("Group name %s didn't match", rule.group_name)
                         return False
 
 
-                logger.debug("%s ok", rule.address)
+                logger.debug("%s %s ok", rule.address, rule.group_name)
                 return True
 
             if not filter(eq, group.rules):
