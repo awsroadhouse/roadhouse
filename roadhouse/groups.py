@@ -106,7 +106,6 @@ class SecurityGroupsConfig(object):
                 # and we return True
                 if rule.address and not filter(lambda y: y.cidr_ip == rule.address, x.grants ):
                     return False
-
                 # if we fall through to here, none of our tests failed,
                 # thus, we match
                 return True
