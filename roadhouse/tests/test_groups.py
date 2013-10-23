@@ -151,6 +151,8 @@ class RemoveExistingRulesTest(BaseConfigTestCase):
         self.sg.authorize("tcp", 22, 22, "192.168.1.1/32")
         self.sg.authorize("tcp", 100, 110, src_group=self.sg2)
         self.c = groups.SecurityGroupsConfig(None)
+        self.c.configure(self.ec2)
+        self.c.reload_remote_groups()
 
     @mock_ec2
     def test_remove_duplicate(self):
@@ -161,6 +163,7 @@ class RemoveExistingRulesTest(BaseConfigTestCase):
     @mock_ec2
     def test_make_sure_wrong_group_isnt_removed(self):
         self.sg2 = self.ec2.create_security_group("test_group3", "jon is not bad")
+        self.c.reload_remote_groups()
         rule = groups.Rule.parse("tcp port 100-110 test_group3")
         result = self.c.remove_existing_rules(rule, self.sg)
         assert len(result) == 1

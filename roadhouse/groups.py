@@ -42,17 +42,22 @@ class SecurityGroupsConfig(object):
         yaml_as_dict = yaml.load(tmp)
         return SecurityGroupsConfig(yaml_as_dict)
 
+    def reload_remote_groups(self):
+        """reloads the existing groups from AWS
+        """
+        self.existing_groups = self.ec2.get_all_security_groups()
+
     def apply(self):
         """
         returns a list of new security groups that will be added
         """
         if self.existing_groups is None:
-            self.existing_groups = self.ec2.get_all_security_groups()
+            self.reload_remote_groups()
 
         self._apply_groups()
 
         # reloads groups
-        self.existing_groups = self.ec2.get_all_security_groups()
+        self.reload_remote_groups()
 
         groups = {k.name:k for k in self.existing_groups}
 
@@ -86,8 +91,8 @@ class SecurityGroupsConfig(object):
         for rule in rules:
 
             def eq(x):
-                # returns if any of the existing rules match the one we're examinging
-
+                # returns True if this existing AWS rule matches the one we want to create
+                assert isinstance(x, boto.ec2.securitygroup.IPPermissions)
                 # these are simple catches that determine if we can rule out
                 # the existing rule
                 if x.ip_protocol != rule.protocol:
@@ -102,12 +107,22 @@ class SecurityGroupsConfig(object):
                     logger.debug("ruled out due to to_port: %s vs %s", x.to_port, rule.to_port)
                     return False
 
-                # final check - if one of these rules matches we already have a matching rule
+                # final checks - if one of these rules matches we already have a matching rule
                 # and we return True
                 if rule.address and not filter(lambda y: y.cidr_ip == rule.address, x.grants ):
+                    logger.debug("%s not found in grants", rule.address)
                     return False
                 # if we fall through to here, none of our tests failed,
                 # thus, we match
+                if rule.group_name:
+                    logger.debug("Checking group name %s against known groups", rule.group_name)
+
+                    if not filter(lambda z: z.name == rule.group_name, self.existing_groups):
+                        logger.debug("Group name {} didn't match", rule.group_name)
+                        return False
+
+
+                logger.debug("%s ok", rule.address)
                 return True
 
             if not filter(eq, group.rules):
