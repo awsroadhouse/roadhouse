@@ -9,6 +9,7 @@ import yaml
 # needs to include ports, TCP/UDP, and
 
 class BaseConfigTestCase(unittest.TestCase):
+    @mock_ec2
     def setUp(self):
         self.ec2 = boto.connect_ec2('somekey', 'somesecret')
 
@@ -23,10 +24,10 @@ def cc(tmp, ec2):
     return config.apply()
 
 
-@mock_ec2
 class CreationTest(BaseConfigTestCase):
     # ensures new groups are created
 
+    @mock_ec2
     def test_creation_no_existing_groups(self):
         c = self.config
         c.apply()
@@ -34,6 +35,7 @@ class CreationTest(BaseConfigTestCase):
         self.assertGreater(c.new_group_count, 0)
         c.apply()
 
+    @mock_ec2
     def test_no_description(self):
         tmp = {"test_no_description":
                    {"options": {} }}
@@ -41,9 +43,10 @@ class CreationTest(BaseConfigTestCase):
         config.apply()
         self.assertGreater(config.new_group_count, 0)
 
+    @mock_ec2
     def test_vpc(self):
         tmp = {"test_vpc":
-                   {"options": {"vpc":"test_vpc"} }}
+                   {"options": {"vpc":"vpc_id123"} }}
 
         c = cc(tmp, self.ec2)
         self.assertGreater(c.new_group_count, 0)
@@ -183,6 +186,7 @@ class RemoveExistingRulesTest(unittest.TestCase):
         rule = groups.Rule.parse("udp port 22 192.168.1.1")
         result = self.c.filter_existing_rules(rule, self.sg)
         assert len(result) == 1
+
 
 
 

@@ -133,14 +133,13 @@ class SecurityGroupsConfig(object):
 
     def _apply_groups(self):
         existing_group_names = [x.name for x in self.existing_groups]
-
         for x,y in self.config.items():
             options = y.get('options', {})
             desc = options.get('description', " ")
 
             if x not in existing_group_names:
                 # create the group
-                group = self.ec2.create_security_group(x, desc)
+                group = self.ec2.create_security_group(x, desc, vpc_id=options.get('vpc'))
                 # set up ports
                 self.new_group_count += 1
             else:
