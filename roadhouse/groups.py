@@ -16,7 +16,7 @@ def sync(yaml_file_path, ec2_conn = None):
 
     sgc = SecurityGroupsConfig.load(yaml_file_path)
     sgc.configure(ec2_conn)
-    sgc.apply_changes()
+    sgc.apply()
     return sgc
 
 
@@ -69,7 +69,7 @@ class SecurityGroupsConfig(object):
                 rules = [Rule.parse(rule) for rule in y.get('rules')]
                 rules = list(itertools.chain(*rules))
 
-                rules = self.remove_existing_rules(rules, group)
+                rules = self.filter_existing_rules(rules, group)
                 # need to use chain because multiple rules can be created for a single stanza
                 for rule in rules:
                     group.authorize(rule.protocol,
@@ -81,7 +81,7 @@ class SecurityGroupsConfig(object):
 
         return self
 
-    def remove_existing_rules(self, rules, group):
+    def filter_existing_rules(self, rules, group):
         """returns list of rules with the existing ones filtered out
         :param group security group we need to check the rules against
         :type group boto.ec2.securitygroup.SecurityGroup

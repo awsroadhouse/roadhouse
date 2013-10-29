@@ -156,7 +156,7 @@ class RemoveExistingRulesTest(unittest.TestCase):
     def test_remove_duplicate(self):
         self.setUp2()
         rule = groups.Rule.parse("tcp port 22 192.168.1.1") # should get filtered
-        result = self.c.remove_existing_rules(rule, self.sg)
+        result = self.c.filter_existing_rules(rule, self.sg)
         assert len(result) == 0
 
     @mock_ec2
@@ -165,7 +165,7 @@ class RemoveExistingRulesTest(unittest.TestCase):
         self.sg2 = self.ec2.create_security_group("test_group3", "jon is not bad")
         self.c.reload_remote_groups()
         rule = groups.Rule.parse("tcp port 100-110 test_group3")
-        result = self.c.remove_existing_rules(rule, self.sg)
+        result = self.c.filter_existing_rules(rule, self.sg)
         assert len(result) == 1
 
     @mock_ec2
@@ -173,7 +173,7 @@ class RemoveExistingRulesTest(unittest.TestCase):
         # should not filtered
         self.setUp2()
         rule = groups.Rule.parse("tcp port 22 192.168.1.2")
-        result = self.c.remove_existing_rules(rule, self.sg)
+        result = self.c.filter_existing_rules(rule, self.sg)
         assert len(result) == 1
 
     @mock_ec2
@@ -181,7 +181,7 @@ class RemoveExistingRulesTest(unittest.TestCase):
         # should not get filtered
         self.setUp2()
         rule = groups.Rule.parse("udp port 22 192.168.1.1")
-        result = self.c.remove_existing_rules(rule, self.sg)
+        result = self.c.filter_existing_rules(rule, self.sg)
         assert len(result) == 1
 
 
