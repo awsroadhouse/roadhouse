@@ -20,10 +20,4 @@ test_web_group:
     - tcp port 80 0.0.0.0/0
 
 
-test_vpc_group:
-  options:
-    vpc: sg_vpc
-
-  rules:
-    - tcp port 80 192.168.1.1/24
 

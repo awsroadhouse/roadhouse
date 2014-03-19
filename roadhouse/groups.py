@@ -72,7 +72,6 @@ class SecurityGroupsConfig(object):
                 rules = self.filter_existing_rules(rules, group)
                 # need to use chain because multiple rules can be created for a single stanza
                 for rule in rules:
-
                     group_name = groups.get(rule.group_name, None)
                     if group_name and rule.address:
                         raise Exception("Can't auth an address and a group")
