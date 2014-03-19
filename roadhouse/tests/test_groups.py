@@ -3,7 +3,7 @@ import unittest
 import boto
 from moto import mock_ec2
 import mock
-from roadhouse import groups
+from roadhouse import group
 import yaml
 
 from roadhouse import parser
@@ -17,11 +17,11 @@ class BaseConfigTestCase(unittest.TestCase):
     @property
     def config(self):
         sample = os.path.dirname(__file__) + "/sample.yaml"
-        return groups.SecurityGroupsConfig.load(sample).configure(self.ec2)
+        return group.SecurityGroupsConfig.load(sample).configure(self.ec2)
 
 def cc(tmp, ec2):
     # shorthand to create a config and apply
-    config = groups.SecurityGroupsConfig(tmp).configure(ec2)
+    config = group.SecurityGroupsConfig(tmp).configure(ec2)
     return config.apply()
 
 
@@ -41,7 +41,7 @@ class CreationTest(BaseConfigTestCase):
     def test_no_description(self):
         tmp = {"test_no_description":
                    {"options": {} }}
-        config = groups.SecurityGroupsConfig(tmp).configure(self.ec2)
+        config = group.SecurityGroupsConfig(tmp).configure(self.ec2)
         config.apply()
         self.assertGreater(config.new_group_count, 0)
 
@@ -75,7 +75,7 @@ class RemoveExistingRulesTest(unittest.TestCase):
         self.sg2 = self.ec2.create_security_group("test_group2", "jon is terrible")
         self.sg.authorize("tcp", 22, 22, "192.168.1.1/32")
         self.sg.authorize("tcp", 100, 110, src_group=self.sg2)
-        self.c = groups.SecurityGroupsConfig(None)
+        self.c = group.SecurityGroupsConfig(None)
         self.c.configure(self.ec2)
         self.c.reload_remote_groups()
 
