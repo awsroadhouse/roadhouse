@@ -72,6 +72,13 @@ class SecurityGroupsConfig(object):
                 rules = self.filter_existing_rules(rules, group)
                 # need to use chain because multiple rules can be created for a single stanza
                 for rule in rules:
+
+                    group_name = groups.get(rule.group_name, None)
+                    if group_name and rule.address:
+                        raise Exception("Can't auth an address and a group")
+
+                    logger.debug("Authorizing %s %s %s %s to %s", rule.protocol,
+                                 rule.from_port, rule.to_port, rule.address, group.name)
                     group.authorize(rule.protocol,
                                     rule.from_port,
                                     rule.to_port,
@@ -139,6 +146,7 @@ class SecurityGroupsConfig(object):
 
             if x not in existing_group_names:
                 # create the group
+                logger.info("creating group %s", x)
                 group = self.ec2.create_security_group(x, desc, vpc_id=options.get('vpc'))
                 # set up ports
                 self.new_group_count += 1
