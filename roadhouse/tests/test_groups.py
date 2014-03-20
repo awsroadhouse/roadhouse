@@ -58,14 +58,6 @@ class VPCTest(BaseConfigTestCase):
         self.assertEqual(vpc.vpc_id, "vpc_id123")
 
 
-
-
-
-
-
-
-
-
 class RemoveExistingRulesTest(unittest.TestCase):
 
     def setUp2(self):
