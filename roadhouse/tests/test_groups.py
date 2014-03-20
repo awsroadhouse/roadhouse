@@ -50,18 +50,6 @@ class CreationTest(BaseConfigTestCase):
         config.apply(MockVPC())
         self.assertGreater(config.new_group_count, 0)
 
-class VPCTest(BaseConfigTestCase):
-    @mock_ec2
-    def test_vpc(self):
-        tmp = {"test_vpc":
-                   {"options": {"vpc":"vpc_id123"} }}
-
-        c = cc(tmp, self.ec2)
-
-        self.assertGreater(c.new_group_count, 0)
-        vpc = self.ec2.get_all_security_groups()[0]
-        self.assertEqual(vpc.vpc_id, "vpc_id123")
-
 
 class RemoveExistingRulesTest(unittest.TestCase):
 

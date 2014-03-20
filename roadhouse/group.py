@@ -59,11 +59,11 @@ class SecurityGroupsConfig(object):
         self.reload_remote_groups()
 
         vpc_groups = self.vpc_groups(vpc)
-        self._apply_groups(vpc_groups)
+        self._apply_groups(vpc)
 
         # reloads groups from AWS, the authority
         self.reload_remote_groups()
-        vpc_groups = self.existing_groups
+        vpc_groups = self.vpc_groups(vpc)
 
 
         groups = {k.name:k for k in vpc_groups}
@@ -144,7 +144,9 @@ class SecurityGroupsConfig(object):
 
 
 
-    def _apply_groups(self, vpc_groups):
+    def _apply_groups(self, vpc):
+        vpc_groups = self.vpc_groups(vpc)
+
         existing_group_names = [x.name for x in vpc_groups]
         for x,y in self.config.items():
             options = y.get('options', {})
@@ -153,7 +155,7 @@ class SecurityGroupsConfig(object):
             if x not in existing_group_names:
                 # create the group
                 logger.info("creating group %s", x)
-                group = self.ec2.create_security_group(x, desc, vpc_id=options.get('vpc'))
+                group = self.ec2.create_security_group(x, desc, vpc_id=vpc.id)
                 # set up ports
                 self.new_group_count += 1
             else:
