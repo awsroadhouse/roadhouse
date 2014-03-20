@@ -1,4 +1,5 @@
 import os
+import random
 import unittest
 import boto
 from moto import mock_ec2
@@ -8,6 +9,9 @@ import yaml
 
 from roadhouse import parser
 # needs to include ports, TCP/UDP, and
+
+class MockVPC(object):
+    id = "vpc-%s" % random.randint(1000, 9999)
 
 class BaseConfigTestCase(unittest.TestCase):
     @mock_ec2
@@ -22,7 +26,7 @@ class BaseConfigTestCase(unittest.TestCase):
 def cc(tmp, ec2):
     # shorthand to create a config and apply
     config = group.SecurityGroupsConfig(tmp).configure(ec2)
-    return config.apply(None)
+    return config.apply(MockVPC())
 
 
 class CreationTest(BaseConfigTestCase):
@@ -32,17 +36,18 @@ class CreationTest(BaseConfigTestCase):
     def test_creation_no_existing_groups(self):
         # asserts we create a bunch of groups and update none
         c = self.config
-        c.apply(None)
+        vpc = MockVPC()
+        c.apply(vpc)
         self.assertEqual(c.updated_group_count, 0)
         self.assertGreater(c.new_group_count, 0)
-        c.apply(None)
+        c.apply(vpc)
 
     @mock_ec2
     def test_no_description(self):
         tmp = {"test_no_description":
                    {"options": {} }}
         config = group.SecurityGroupsConfig(tmp).configure(self.ec2)
-        config.apply()
+        config.apply(MockVPC())
         self.assertGreater(config.new_group_count, 0)
 
 class VPCTest(BaseConfigTestCase):

@@ -54,6 +54,7 @@ class SecurityGroupsConfig(object):
         """
         returns a list of new security groups that will be added
         """
+        assert vpc is not None
         # make sure we're up to date
         self.reload_remote_groups()
 
