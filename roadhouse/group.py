@@ -51,12 +51,12 @@ class SecurityGroupsConfig(object):
         """
         returns a list of new security groups that will be added
         """
-        if self.existing_groups is None:
-            self.reload_remote_groups()
+        # make sure we're up to date
+        self.reload_remote_groups()
 
         self._apply_groups()
 
-        # reloads groups
+        # reloads groups from AWS, the authority
         self.reload_remote_groups()
 
         groups = {k.name:k for k in self.existing_groups}
