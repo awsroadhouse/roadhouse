@@ -36,6 +36,9 @@ class SecurityGroupsConfig(object):
         self.ec2 = ec2_conn
         return self
 
+    def vpc_groups(self, vpc):
+        return [x for x in self.existing_groups if x.vpc_id == vpc.id]
+
     @classmethod
     def load(cls, yaml_path):
         tmp = open(yaml_path, 'r').read()
@@ -47,14 +50,14 @@ class SecurityGroupsConfig(object):
         """
         self.existing_groups = self.ec2.get_all_security_groups()
 
-    def apply(self, vpc_id = None):
+    def apply(self, vpc):
         """
         returns a list of new security groups that will be added
         """
         # make sure we're up to date
         self.reload_remote_groups()
 
-        vpc_groups = self.existing_groups
+        vpc_groups = self.vpc_groups(vpc)
         self._apply_groups(vpc_groups)
 
         # reloads groups from AWS, the authority

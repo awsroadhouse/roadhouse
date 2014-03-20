@@ -22,7 +22,7 @@ class BaseConfigTestCase(unittest.TestCase):
 def cc(tmp, ec2):
     # shorthand to create a config and apply
     config = group.SecurityGroupsConfig(tmp).configure(ec2)
-    return config.apply()
+    return config.apply(None)
 
 
 class CreationTest(BaseConfigTestCase):
@@ -32,10 +32,10 @@ class CreationTest(BaseConfigTestCase):
     def test_creation_no_existing_groups(self):
         # asserts we create a bunch of groups and update none
         c = self.config
-        c.apply()
+        c.apply(None)
         self.assertEqual(c.updated_group_count, 0)
         self.assertGreater(c.new_group_count, 0)
-        c.apply()
+        c.apply(None)
 
     @mock_ec2
     def test_no_description(self):
