@@ -54,12 +54,15 @@ class SecurityGroupsConfig(object):
         # make sure we're up to date
         self.reload_remote_groups()
 
-        self._apply_groups()
+        vpc_groups = self.existing_groups
+        self._apply_groups(vpc_groups)
 
         # reloads groups from AWS, the authority
         self.reload_remote_groups()
+        vpc_groups = self.existing_groups
 
-        groups = {k.name:k for k in self.existing_groups}
+
+        groups = {k.name:k for k in vpc_groups}
 
         for x,y in self.config.items():
             # process 1 security group at a time
@@ -137,8 +140,8 @@ class SecurityGroupsConfig(object):
 
 
 
-    def _apply_groups(self):
-        existing_group_names = [x.name for x in self.existing_groups]
+    def _apply_groups(self, vpc_groups):
+        existing_group_names = [x.name for x in vpc_groups]
         for x,y in self.config.items():
             options = y.get('options', {})
             desc = options.get('description', " ")
