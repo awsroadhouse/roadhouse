@@ -1,6 +1,6 @@
 boto>=2.14.0
 PyYAML>=3.10
-moto==0.2.19
+moto==0.2.20
 mock==1.0.1
 pyparsing==2.0.1
 nose
