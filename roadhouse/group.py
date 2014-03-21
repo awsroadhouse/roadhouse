@@ -85,11 +85,19 @@ class SecurityGroupsConfig(object):
 
                     logger.debug("Authorizing %s %s %s %s to %s", rule.protocol,
                                  rule.from_port, rule.to_port, rule.address, group.name)
-                    group.authorize(rule.protocol,
+
+                    group_to_authorize = groups.get(rule.group_name, None)
+
+                    try:
+                        group.authorize(rule.protocol,
                                     rule.from_port,
                                     rule.to_port,
                                     rule.address,
-                                    groups.get(rule.group_name, None))
+                                    group_to_authorize, None)
+                    except Exception as e:
+                        print "could not authorize group %s" % group_to_authorize
+                        raise
+
                 # apply rules
 
         return self
