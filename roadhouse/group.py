@@ -83,8 +83,8 @@ class SecurityGroupsConfig(object):
                     if group_name and rule.address:
                         raise Exception("Can't auth an address and a group")
 
-                    logger.debug("Authorizing %s %s %s %s to %s", rule.protocol,
-                                 rule.from_port, rule.to_port, rule.address, group.name)
+                    logger.debug("Authorizing %s %s %s to address:%s name:%s", rule.protocol,
+                                 rule.from_port, rule.to_port, rule.address, rule.group_name)
 
                     group_to_authorize = groups.get(rule.group_name, None)
 
@@ -116,16 +116,21 @@ class SecurityGroupsConfig(object):
                 assert isinstance(x, boto.ec2.securitygroup.IPPermissions)
                 # these are simple catches that determine if we can rule out
                 # the existing rule
+                if rule.group_name and x.grants[0].group_id \
+                    and rule.group_name != self.get_group(x.grants[0].group_id).name:
+                    logger.debug("Group name %s didn't match %s", rule.group_name, x.grants[0].name)
+                    return False
+
                 if x.ip_protocol != rule.protocol:
                     logger.debug("ruled out due to protocol: %s vs %s", x.ip_protocol, rule.protocol)
                     return False
 
-                if x.from_port != rule.from_port:
-                    logger.debug("ruled out due to from_port: %s vs %s", x.from_port, rule.from_port)
+                if int(x.from_port) != int(rule.from_port):
+                    logger.debug("ruled out due to from_port: %s vs %s", int(x.from_port), int(rule.from_port))
                     return False
 
-                if x.to_port != rule.to_port:
-                    logger.debug("ruled out due to to_port: %s vs %s", x.to_port, rule.to_port)
+                if int(x.to_port) != (rule.to_port):
+                    logger.debug("ruled out due to to_port: %s vs %s", int(x.to_port), int(rule.to_port))
                     return False
 
                 # final checks - if one of these rules matches we already have a matching rule
@@ -133,23 +138,23 @@ class SecurityGroupsConfig(object):
                 if rule.address and not filter(lambda y: y.cidr_ip == rule.address, x.grants ):
                     logger.debug("%s not found in grants", rule.address)
                     return False
-                # if we fall through to here, none of our tests failed,
-                # thus, we match
-                if rule.group_name:
-                    logger.debug("Checking group name %s against known groups", rule.group_name)
-
-                    if not filter(lambda z: z.name == rule.group_name, x.grants):
-                        logger.debug("Group name %s didn't match", rule.group_name)
-                        return False
-
 
                 logger.debug("%s %s ok", rule.address, rule.group_name)
                 return True
 
-            if not filter(eq, group.rules):
+            logger.debug("Applying rules for %s", group.name)
+            filtered = filter(eq, group.rules)
+
+            if not filtered:
+                logger.debug(filtered)
+                logger.debug("Applying rule %s against %s", rule, group.rules)
                 tmp.append(rule)
         return tmp
 
+    def get_group(self, group_id):
+        for x in self.existing_groups:
+            if x.id == group_id:
+                return x
 
 
     def _apply_groups(self, vpc):
