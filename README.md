@@ -20,6 +20,7 @@ In a virtualenv, `pip install -r requirements`
 Usage
 ======
 
+    from roadhouse.group import SecurityGroupsConfig
     v = vpc.connect_to_region('us-west-1')
     e = ec2.connect_to_region('us-west-1')
 
