@@ -15,3 +15,20 @@ Development
 =============
 
 In a virtualenv, `pip install -r requirements`
+
+
+Usage
+======
+
+    v = vpc.connect_to_region('us-west-1')
+    e = ec2.connect_to_region('us-west-1')
+
+    # assuming you only have 1 vpc already created
+    # otherwise you'll need to pick the right VPC you want
+    # to apply your changes to
+    vpc = v.get_all_vpcs()[0]
+
+    config = SecurityGroupsConfig.load("roadhouse.yaml")
+    config.configure(ec2_conn)
+    config.apply(vpc)
+
