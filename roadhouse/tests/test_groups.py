@@ -77,8 +77,10 @@ class RemoveExistingRulesTest(unittest.TestCase):
         self.sg2 = self.ec2.create_security_group("test_group3", "jon is not bad")
         self.c.reload_remote_groups()
         rule = parser.Rule.parse("tcp port 100-110 test_group3")
+
+        self.sg = [x for x in self.c.existing_groups if x.name == "test_group"][0]
         result = self.c.filter_existing_rules(rule, self.sg)
-        assert len(result) == 1
+        assert len(result) == 1, len(result)
 
     @mock_ec2
     def test_leave_different_ip(self):

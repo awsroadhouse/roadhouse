@@ -116,6 +116,10 @@ class SecurityGroupsConfig(object):
                 assert isinstance(x, boto.ec2.securitygroup.IPPermissions)
                 # these are simple catches that determine if we can rule out
                 # the existing rule
+                group_match = False
+                if rule.group_name:
+                    logger.debug("Checking for possible group name match %s", x.grants[0].group_id)
+
                 if rule.group_name and x.grants[0].group_id \
                     and rule.group_name != self.get_group(x.grants[0].group_id).name:
                     logger.debug("Group name %s didn't match %s", rule.group_name, x.grants[0].name)
@@ -140,6 +144,9 @@ class SecurityGroupsConfig(object):
                     return False
 
                 logger.debug("%s %s ok", rule.address, rule.group_name)
+                logger.debug("port_from: %s %s", rule.from_port, x.from_port)
+                logger.debug("port_to: %s %s", rule.to_port, x.to_port)
+                logger.debug("group: %s %s", rule.group_name, x.to_port)
                 return True
 
             logger.debug("Applying rules for %s", group.name)
