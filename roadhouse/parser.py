@@ -30,7 +30,7 @@ ports  = delimitedList(normalized_port_range)('ports')
 
 # IP addresses, name of another group, or sg-*
 security_group = Regex("sg-[\w\d]+")
-group_name = Regex("[\w\d\-]+")
+group_name = Regex("[\w\d\(-|.|_)]+")
 
 mask = Word("/") + Word(nums).setParseAction(to_int)('mask')
 ip= (Combine(Word(nums) + ('.' + Word(nums))*3)('ip') + Optional(mask)('mask')).setParseAction(normalize_ip)
