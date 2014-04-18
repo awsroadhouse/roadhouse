@@ -4,8 +4,9 @@ from pyparsing import Word, nums, CaselessKeyword, Optional, Combine, And, Keywo
 port_ = CaselessKeyword("port")
 tcp_ = CaselessKeyword("tcp")
 udp_ = CaselessKeyword("udp")
+icmp_ = CaselessKeyword("icmp")
 
-protocol = tcp_ ^ udp_
+protocol = tcp_ ^ udp_ ^ icmp_
 
 def to_int(s,l,t):
     return [int(t[0])]
