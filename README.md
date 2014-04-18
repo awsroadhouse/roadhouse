@@ -15,6 +15,7 @@ Config File Syntax
 ====================
 
 The config file is YAML based.  Groups are the top level object.  Within a group are options and rules.  Rules are specified using a syntax similar to tcpdump (at a very, very trivial level).
+For ICMP protocol we use ICMP Type Numbers for port. More information is available at: https://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml
 
     - <protocol:optional, tcp by default> <port> <group_or_ip_mask_optional>
 
@@ -30,6 +31,7 @@ It should be easier to understand a valid configuration based on example:
         - tcp port 9160, 6379 test_web_group # refer to a group by name
         - port 55 192.168.1.1 # /32 by default
         - tcp port 22-50, 55-60 192.168.1.1
+        - icmp port 0 192.168.1.1 # ICMP Type 0; Echo Reply
 
     test_web_group:
       options:
@@ -38,6 +40,7 @@ It should be easier to understand a valid configuration based on example:
 
       rules:
         - tcp port 80 0.0.0.0/0
+        - icmp port 8 192.168.1.1/32 # ICMP Type 13 Timestamp
 
 
 Usage
