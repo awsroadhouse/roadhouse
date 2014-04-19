@@ -40,7 +40,7 @@ It should be easier to understand a valid configuration based on example:
 
       rules:
         - tcp port 80 0.0.0.0/0
-        - icmp port 8 192.168.1.1/32 # ICMP Type 13 Timestamp
+        - icmp port 8 192.168.1.1/32 # ICMP Type 13; Timestamp
 
 
 Usage
