@@ -12,7 +12,7 @@ def to_int(s,l,t):
     return [int(t[0])]
 
 def to_port_range(s, l, t):
-    if t[0].port:
+    if t[0].port or t[0].port==0: # handle ICMP type 0
         return [(t[0].port, t[0].port)]
     else:
         return [(t[0][0].port, t[0][1].port)]
@@ -27,7 +27,7 @@ port_range = Group((port + Word("-").suppress() + port)('range'))
 
 normalized_port_range = (port ^ port_range).setParseAction(to_port_range)
 
-ports  = delimitedList(normalized_port_range)('ports')
+ports = delimitedList(normalized_port_range)('ports')
 
 # IP addresses, name of another group, or sg-*
 security_group = Regex("sg-[\w\d]+")
