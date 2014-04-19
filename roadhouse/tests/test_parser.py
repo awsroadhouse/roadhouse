@@ -26,6 +26,13 @@ class RuleParseTest(unittest.TestCase):
         self.assertEqual(tmp.from_port, 80)
         self.assertEqual(tmp.to_port, 80)
 
+    def test_single_icmp_rule(self):
+        result = parser.Rule.parse("icmp port 0 192.168.1.1/32")
+        self.assertEqual(len(result), 1)
+        tmp = result[0]
+        self.assertTrue(isinstance(tmp, parser.Rule))
+        self.assertEqual(tmp.from_port, 0)
+
     def test_group_name_parse(self):
         inputs=["web_server", "web-server", "web.server"]
         for input in inputs:
