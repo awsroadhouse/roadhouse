@@ -34,7 +34,8 @@ class RuleParseTest(unittest.TestCase):
         self.assertEqual(tmp.from_port, 0)
 
     def test_group_name_parse(self):
-        inputs=["web_server", "web-server", "web.server"]
+        result = parser.Rule.parse("tcp port 80 web_server")
+        inputs = ["web_server", "web-server", "web.server"]
         for input in inputs:
             result = parser.Rule.parse("tcp port 80 {}".format(input))[0]
             self.assertTrue(isinstance(result, parser.Rule))
