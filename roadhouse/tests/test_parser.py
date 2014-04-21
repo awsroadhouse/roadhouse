@@ -28,6 +28,10 @@ class RuleParseTest(unittest.TestCase):
 
     def test_group_name_parse(self):
         result = parser.Rule.parse("tcp port 80 web_server")
+        inputs = ["web_server", "web-server", "web.server"]
+        for input in inputs:
+            result = parser.Rule.parse("tcp port 80 {}".format(input))[0]
+            self.assertTrue(isinstance(result, parser.Rule))
 
     def test_sg_parse(self):
         sg = "sg-edcd9784"
