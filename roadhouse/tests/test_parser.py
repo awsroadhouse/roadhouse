@@ -60,6 +60,10 @@ class RulesParsingTest(unittest.TestCase):
         result = self.parse("icmp port 0 192.168.1.1/32")
         self.assertEqual(result.protocol, "icmp")
 
+    def test_tcp_port_zero(self):
+        result = self.parse("tcp port 0 192.168.1.1/32")
+        self.assertEqual(result.ports[0], (0,0))
+
     def test_multiple_ports(self):
         result = self.parse("tcp port 80, 100 192.168.1.1/32")
 
