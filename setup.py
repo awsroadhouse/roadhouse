@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='roadhouse',
-    version='0.4',
+    version='0.5',
     packages=['roadhouse'],
     install_requires=["boto", "pyparsing", "PyYAML"],
     classifiers=["Development Status :: 4 - Beta",
