@@ -21,4 +21,6 @@ test_web_group:
     - tcp port 80 0.0.0.0/0
 
 
-
+test_empty_group:
+    options:
+        description: empty
